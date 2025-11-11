@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hyperflipedia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+      -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+      line-height:1.45; min-height:100vh;
+      background:linear-gradient(180deg,#0b0d10 0%, #0f1115 60%);
+      color:#eaf0ff; transition:background 260ms ease;
+    }
+
+   
+    :root{
+      --bg-main:#0f1115; --bg-block:#0f1318; --card:#111217;
+      --muted:#9aa4b2; --text:#eaf0ff;
+      --accent-a:#7c3aed; --accent-b:#ff4d6d; --accent-c:#00d4ff; --accent-d:#ffd166;
+      --border:rgba(255,255,255,0.05); --glass:rgba(255,255,255,0.02);
+      --shadow:0 10px 30px rgba(2,6,23,0.6);
+      --subtle-glow:0 8px 28px rgba(124,58,237,0.07);
+      --radius:14px; --focus:0 0 0 4px rgba(124,58,237,0.12);
+      --transition:240ms cubic-bezier(.2,.9,.3,1);
+    }
+
+
+    header.app-header{position:sticky;top:0;z-index:40;border-bottom:1px solid var(--border);background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);backdrop-filter:blur(6px)}
+    header.app-header::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:linear-gradient(90deg,var(--accent-a),var(--accent-b),var(--accent-c));opacity:0.13;pointer-events:none}
+    .header-inner{max-width:1200px;margin:0 auto;display:flex;gap:16px;align-items:center;padding:14px 20px}
+    .brand{display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit}
+    .logo{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent-a),var(--accent-c));box-shadow:var(--subtle-glow);flex-shrink:0;border:1px solid rgba(255,255,255,0.04)}
+    .logo img{width:100%;height:100%;object-fit:contain;display:block;border-radius:inherit}
+    .brand h1{font-size:18px;font-weight:800;letter-spacing:0.02em}
+    .brand small{display:block;font-weight:600;color:var(--muted);font-size:12px;margin-top:2px}
+
+    .nav{display:flex;gap:10px;margin-left:8px;align-items:center}
+    .nav a{padding:8px 12px;border-radius:10px;text-decoration:none;color:var(--muted);font-weight:700;font-size:13px;transition:all var(--transition)}
+    .nav a.active,.nav a:hover{background:linear-gradient(90deg, rgba(124,58,237,0.09), rgba(255,77,109,0.06));color:var(--text);box-shadow:var(--subtle-glow)}
+
+    .header-actions{margin-left:auto;display:flex;align-items:center;gap:12px}
+
+
+    .container{max-width:1200px;margin:28px auto;padding:20px}
+    .layout{display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start}
+    @media (max-width:980px){.layout{grid-template-columns:1fr}.nav{display:none}}
+
+    .sidebar{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border-radius:var(--radius);padding:16px;border:1px solid var(--border);box-shadow:var(--shadow);position:sticky;top:86px}
+    .search-input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text);outline:none;font-size:14px;transition:box-shadow var(--transition),border-color var(--transition)}
+    .search-input:focus{border-color:rgba(124,58,237,0.36);box-shadow:var(--focus)}
+    .search-row{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+    .search-btn{width:44px;height:44px;border-radius:10px;display:grid;place-items:center;border:1px solid var(--border);background:linear-gradient(180deg,var(--bg-block),transparent);cursor:pointer}
+    .alpha{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px}
+    .alpha button{background:transparent;border:1px solid var(--border);color:var(--muted);padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px}
+    .alpha button.active{background:linear-gradient(90deg, rgba(124,58,237,0.08), rgba(255,77,109,0.04));color:var(--text);box-shadow:var(--subtle-glow);border-color:rgba(124,58,237,0.14)}
+    .muted{color:var(--muted);font-size:13px}
+
+  
+    .panel{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border-radius:var(--radius);padding:20px;border:1px solid var(--border);box-shadow:var(--shadow)}
+    .page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .page-header h2{font-size:20px;font-weight:800;color:var(--text)}
+    .subtitle{color:var(--muted);font-size:13px;margin-top:4px}
+
+    
+    .alts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-top:8px}
+    .alt-card{position:relative;overflow:hidden;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border-radius:12px;padding:14px;border:1px solid var(--border);transition:transform var(--transition),box-shadow var(--transition),border-color var(--transition);cursor:pointer}
+    .alt-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(180deg,var(--accent-a),var(--accent-b));transform:translateX(-6px);transition:transform var(--transition)}
+    .alt-card:hover::before{transform:translateX(0)}
+    .alt-card:hover{transform:translateY(-8px);box-shadow:0 18px 50px rgba(2,6,23,0.55);border-color:rgba(124,58,237,0.06)}
+    .alt-name{font-weight:800;color:var(--text);font-size:15px;margin-bottom:6px}
+    .alt-owner{color:var(--muted);font-size:13px;margin-bottom:8px}
+    .alt-stats{display:flex;gap:10px;color:var(--muted);font-size:13px}
+
+   
+    .modal{display:none;position:fixed;inset:0;background:rgba(3,6,12,0.6);z-index:80;align-items:center;justify-content:center;padding:24px}
+    .modal.active{display:flex}
+    .modal-content{width:100%;max-width:880px;border-radius:14px;padding:20px;background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow);transform:translateY(8px)}
+    .modal-close{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:6px;border-radius:8px}
+    .profile-pic{width:96px;height:96px;border-radius:12px;object-fit:cover;border:1px solid var(--border)}
+    .info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:12px}
+    .info-item{background:transparent;padding:10px;border-radius:8px;border:1px dashed rgba(255,255,255,0.02)}
+    .tracks-list{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+    .track-item{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:10px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border)}
+
+    
+    .submission-guide{display:grid;gap:12px}
+    .guide-block{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:14px;border-radius:10px;border:1px solid var(--border)}
+    .guide-title{font-weight:800;color:var(--text);margin-bottom:6px}
+    pre.copybox{background:rgba(0,0,0,0.06);padding:12px;border-radius:8px;overflow:auto;font-size:13px;color:var(--text);border:1px solid rgba(255,255,255,0.02)}
+
+    
+    footer{max-width:1200px;margin:28px auto 60px;padding:12px 20px;color:var(--muted);font-size:13px;display:flex;justify-content:space-between;gap:12px}
+
+    @media (max-width:520px){.brand h1{font-size:16px}.logo{width:40px;height:40px}.header-inner{padding:12px}}
+  </style>
+</head>
+<body>
+  <header class="app-header" role="banner">
+    <div class="header-inner">
+      <a href="#" class="brand" id="homeBtn" onclick="showSection('browse'); return false;">
+        <div class="logo" aria-hidden="true">
+          <img src="https://i.ibb.co/ym01dp4S/image-removebg-preview.png" alt="Hyperflipedia logo">
+        </div>
+        <div>
+          <h1>Hyperflipedia</h1>
+          <small>Encyclopedia of Hyperflip/Dariacore artists/projects</small>
+        </div>
+      </a>
+
+      <nav class="nav" aria-label="Main navigation">
+        <a href="#" id="nav-browse" class="active" onclick="showSection('browse'); return false;">Browse</a>
+        <a href="#" id="nav-submit" onclick="showSection('submit'); return false;">Submit</a>
+        <a href="#" id="nav-about" onclick="showSection('about'); return false;">About</a>
+      </nav>
+
+      <div class="header-actions" role="toolbar" aria-label="Header actions">
+      </div>
+    </div>
+  </header>
+
+  <main class="container" id="app">
+    <div class="layout">
+      <aside class="sidebar" aria-labelledby="searchLabel">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-weight:800">Search</div>
+            <div style="font-size:12px;color:var(--muted)">Browse</div>
+          </div>
+
+          <div class="search-row">
+            <input id="searchInput" class="search-input" type="text" placeholder="Search alts, owners, keywords" aria-label="Search">
+            <button class="search-btn" aria-hidden="true" onclick="document.getElementById('searchInput').focus();">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-weight:700;color:var(--muted);font-size:13px">Alphabet</div>
+            <div style="font-size:12px;color:var(--muted)">Filter</div>
+          </div>
+          <div class="alpha" id="alphabetNav" aria-label="Alphabet filter" role="toolbar"></div>
+
+          <div style="margin-top:12px">
+            <div class="muted" style="font-size:13px">Tip: combine alphabet + search for fast results. To add a listing, follow the Submit guide and DM <strong>@symest</strong> on Discord.</div>
+          </div>
+        </div>
+      </aside>
+
+      <section>
+        <div id="panel-browse" class="panel">
+          <div class="page-header">
+            <div>
+              <h2>Browse Entries</h2>
+              <div class="subtitle">A directory of accounts related to Hyperflip &amp; Dariacore.</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <div class="muted" style="font-size:13px">Total: <span id="totalCount">0</span></div>
+            </div>
+          </div>
+
+          <div id="altsContainer"></div>
+        </div>
+
+        <div id="panel-submit" class="panel" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <h2>How to submit (Discord)</h2>
+              <div class="muted">Please DM <strong>@symest</strong> on Discord with the information below! Sorry, but this site is static and doesn't accept direct uploads.</div>
+            </div>
+            <div>
+              <a class="chip" onclick="showSection('browse')" style="cursor:pointer;text-decoration:none;color:var(--muted);padding:6px 8px;border-radius:10px;border:1px solid var(--border);background:transparent">Back</a>
+            </div>
+          </div>
+
+          <div class="submission-guide" style="margin-top:12px">
+            <div class="guide-block">
+              <div class="guide-title">What to include</div>
+              <ul style="margin-left:18px;color:var(--muted)">
+                <li><strong>Name</strong> — Self explanatory, hehe</li>
+                <li><strong>Profile Link</strong> — your Discord tag (e.g. Username#1234) or a link to your main profile.</li>
+                <li><strong>At least one track link</strong> — a direct track URL (SoundCloud, Bandcamp, YouTube) demonstrating the sound.</li>
+                <li><strong>Short description</strong> — 1–3 sentences describing style or notable details.</li>
+                <li><strong>Other necessary things</strong> — If you are not filling all the fields of a page, don't submit it.</li>
+                <li><strong>Don't be shy</strong> — If you're confused, please don't be scared to ask me for help!</li>
+              </ul>
+            </div>
+
+            <div class="guide-block">
+              <div class="guide-title">Discord message template</div>
+              <div class="muted" style="margin-bottom:8px">Copy &amp; paste this template into a DM to <strong>@symest</strong>, then attach images if needed!</div>
+              <pre class="copybox" id="discordTemplate" tabindex="0">
+Name: [Name here]
+Profile: [URL]
+Owner (if alt): [URL]
+Track example: [URL]
+Description: [1–3 sentences]
+Other attachments: Things like images, stats, etc.
+              </pre>
+              <div style="display:flex;gap:10px;margin-top:8px">
+                <button class="btn" onclick="copyTemplate()" style="padding:10px 12px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent-a),var(--accent-b));color:#fff;font-weight:700;cursor:pointer">Copy template</button>
+                <button class="btn ghost" onclick="openDiscordGuide()" style="padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer">Contact notes</button>
+              </div>
+            </div>
+
+            <div class="guide-block">
+              <div class="guide-title">Quick tips</div>
+              <ul style="margin-left:18px;color:var(--muted)">
+                <li>Include working URLs — broken links make it harder to verify details!</li>
+                <li>If an alt is private, include screenshots or public clues that support the listing! No leaking secret alts!</li>
+                <li>Make sure to keep the description short and factual</li>
+                <li>The listing owner may follow up on Discord for clarification if needed!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div id="panel-about" class="panel" style="display:none">
+          <h2>About</h2>
+          <div class="muted" style="margin-top:8px">Hyperflipedia documents accounts and projects within the Hyperflip/Dariacore scene! If YOU would like to submit yourself, feel free to head to the submit tab! <strong>@symest</strong> on Discord to send it.</div>
+          <div style="margin-top:12px">
+            <strong>Contact</strong>
+            <p class="muted">Discord: <strong>@symest</strong></p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div>© <span id="year"></span> Symest</div>
+    <div class="muted">Made with nothing but love by me, and the countless amazing friends I've made in this community! ♡</div>
+  </footer>
+
+
+  <div id="altModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content" role="document">
+      <div style="display:flex;justify-content:flex-end">
+        <button class="modal-close" onclick="closeModal()" aria-label="Close modal">&times;</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+
+
+
+    const altsData = [
+      {
+        id:1,
+        name:"Leroy",
+        owner:"Jane Remover",
+        ownerLink:"https://soundcloud.com/janeremover",
+        profileLink:"https://soundcloud.com/c0ncernn",
+        profilePic:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFGvR1LiWD8XMLY8pzD79L-loB_OYjn9733A&s",
+        followers:"35.3K",
+        description:"Leroy is the creator of Dariacore, having produced the first 3 genre-defining albums. It is a side project of American artist, Jane Remover. Despite it being their alternative account, their Dariacore albums have ironically found arguably more success than their main project.",
+        created:"2021",
+        recentTracks:[{name:"Dariacore (Album)",plays:"1M+"}, {name:"Dariacore 3... At least I think that's what it's called?",plays:"1M+"}, {name:"Dariacore 2: Enter Here, Hell to the Left",plays:"900K+"}]
+      },
+
+    ];
+
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const root = document.documentElement;
+
+
+    function showSection(key){
+      const panels = ['browse','submit','about'];
+      panels.forEach(p => {
+        const el = document.getElementById('panel-' + p);
+        const nav = document.getElementById('nav-' + p);
+        if(p === key){
+          if(el) el.style.display = 'block';
+          if(nav) nav.classList.add('active');
+        } else {
+          if(el) el.style.display = 'none';
+          if(nav) nav.classList.remove('active');
+        }
+      });
+      if(key === 'browse') displayAlts();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function initAlphabet(){
+      const nav = document.getElementById('alphabetNav'); nav.innerHTML = '';
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'.split('');
+      letters.forEach(l => {
+        const b = document.createElement('button');
+        b.textContent = l;
+        b.onclick = (e) => filterByLetter(l, e);
+        nav.appendChild(b);
+      });
+    }
+
+
+    function makeAltCard(alt){
+      const card = document.createElement('div');
+      card.className = 'alt-card';
+      card.setAttribute('role','button');
+      card.tabIndex = 0;
+
+
+      card.addEventListener('click', () => showAltDetails(alt));
+
+      card.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showAltDetails(alt); }
+      });
+
+      const inner = document.createElement('div');
+      inner.style.display = 'flex';
+      inner.style.justifyContent = 'space-between';
+      inner.style.alignItems = 'start';
+
+      const left = document.createElement('div');
+      const name = document.createElement('div');
+      name.className = 'alt-name';
+      name.innerHTML = escapeHtml(alt.name);
+      const owner = document.createElement('div');
+      owner.className = 'alt-owner';
+      owner.innerHTML = 'by ' + escapeHtml(alt.owner);
+      left.appendChild(name);
+      left.appendChild(owner);
+
+      const right = document.createElement('div');
+      right.style.display = 'flex';
+      right.style.flexDirection = 'column';
+      right.style.gap = '8px';
+      right.style.alignItems = 'flex-end';
+      const tracks = document.createElement('div');
+      tracks.className = 'muted';
+      tracks.style.fontSize = '12px';
+      tracks.textContent = (alt.tracks ?? 0) + ' tracks';
+      right.appendChild(tracks);
+
+      inner.appendChild(left);
+      inner.appendChild(right);
+      card.appendChild(inner);
+
+      return card;
+    }
+
+
+    function displayAlts(data = altsData){
+      const container = document.getElementById('altsContainer');
+      const totalCount = document.getElementById('totalCount');
+      if(!data || data.length === 0){
+        container.innerHTML = `<div class="panel" style="padding:28px;border-radius:12px;"><div style="font-weight:800;margin-bottom:6px;color:var(--text)">No entries found!</div><div class="muted">Try another search or clear filters.</div></div>`;
+        totalCount.textContent = 0;
+        return;
+      }
+      totalCount.textContent = data.length;
+
+  
+      const grouped = {};
+      data.forEach(alt => {
+        const first = /^[0-9]/.test(alt.name) ? '#' : (alt.name ? alt.name[0].toUpperCase() : '?');
+        (grouped[first] || (grouped[first] = [])).push(alt);
+      });
+
+      const letters = Object.keys(grouped).sort((a,b) => { if(a === '#') return 1; if(b === '#') return -1; return a.localeCompare(b); });
+
+
+      const frag = document.createDocumentFragment();
+      letters.forEach(letter => {
+        const block = document.createElement('div');
+        block.style.marginTop = '14px';
+
+        const h = document.createElement('h3');
+        h.style.marginBottom = '10px';
+        h.style.color = 'var(--text)';
+        h.textContent = letter;
+        block.appendChild(h);
+
+        const grid = document.createElement('div');
+        grid.className = 'alts-grid';
+
+        grouped[letter].forEach(alt => {
+          const card = makeAltCard(alt);
+          grid.appendChild(card);
+        });
+
+        block.appendChild(grid);
+        frag.appendChild(block);
+      });
+
+
+      container.innerHTML = '';
+      container.appendChild(frag);
+    }
+
+    function escapeHtml(str){ if(!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+
+    function showAltDetails(alt){
+      const modal = document.getElementById('altModal');
+      const body = document.getElementById('modalBody');
+      body.innerHTML = `
+        <div style="display:flex;gap:14px;align-items:center">
+          <img src="${alt.profilePic || 'https://via.placeholder.com/120'}" alt="${escapeHtml(alt.name)}" class="profile-pic">
+          <div>
+            <h3 style="margin-bottom:6px">${escapeHtml(alt.name)}</h3>
+            <div class="muted">by <a href="${alt.ownerLink}" target="_blank" rel="noopener" style="color:var(--accent-b);font-weight:700">${escapeHtml(alt.owner)}</a></div>
+            <div style="margin-top:8px" class="muted">${escapeHtml(alt.description || '')}</div>
+          </div>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item"><div class="info-label">Followers</div><div class="info-value">${alt.followers ?? '-'}</div></div>
+          <div class="info-item"><div class="info-label">Tracks</div><div class="info-value">${alt.tracks ?? '-'}</div></div>
+          <div class="info-item"><div class="info-label">Created</div><div class="info-value">${escapeHtml(alt.created ?? '-')}</div></div>
+        </div>
+
+        ${alt.recentTracks && alt.recentTracks.length ? `
+          <div style="margin-top:12px">
+            <div class="muted">Recent / Popular</div>
+            <div class="tracks-list">
+              ${alt.recentTracks.map(t => `<div class="track-item"><div>${escapeHtml(t.name)}</div><div class="muted">${t.plays} plays</div></div>`).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        <div style="margin-top:12px">
+          <a class="btn ghost" href="${alt.profileLink}" target="_blank" rel="noopener">View profile</a>
+          <a class="btn" href="${alt.ownerLink}" target="_blank" rel="noopener" style="margin-left:8px">Owner profile</a>
+        </div>
+      `;
+      modal.classList.add('active'); modal.setAttribute('aria-hidden','false');
+    }
+
+    function closeModal(){ const modal = document.getElementById('altModal'); modal.classList.remove('active'); modal.setAttribute('aria-hidden','true'); document.activeElement && document.activeElement.blur(); }
+
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      if(!q){ displayAlts(); return; }
+      const filtered = altsData.filter(alt => (alt.name && alt.name.toLowerCase().includes(q)) || (alt.owner && alt.owner.toLowerCase().includes(q)) || (alt.description && alt.description.toLowerCase().includes(q)));
+      displayAlts(filtered);
+    });
+
+    function filterByLetter(letter,e){
+      const buttons = document.querySelectorAll('#alphabetNav button'); buttons.forEach(b => b.classList.remove('active'));
+      if(e && e.currentTarget) e.currentTarget.classList.add('active');
+      const filtered = letter === '#' ? altsData.filter(alt => /^[0-9]/.test(alt.name)) : altsData.filter(alt => alt.name && alt.name.toUpperCase().startsWith(letter));
+      displayAlts(filtered);
+    }
+
+
+    function copyTemplate(){
+      const template = document.getElementById('discordTemplate').innerText.trim();
+      navigator.clipboard && navigator.clipboard.writeText(template).then(() => {
+        const toast = document.createElement('div');
+        toast.textContent = 'Copied';
+        toast.style.position='fixed'; toast.style.right='18px'; toast.style.bottom='18px';
+        toast.style.padding='10px 14px'; toast.style.borderRadius='10px'; toast.style.background='linear-gradient(90deg,var(--accent-a),var(--accent-b))'; toast.style.color='#fff'; toast.style.boxShadow='var(--subtle-glow)';
+        document.body.appendChild(toast);
+        setTimeout(()=>toast.remove(),1200);
+      }).catch(()=>alert('Oopsie.. Copy failed. Select and copy manually!'));
+    }
+
+
+    function openDiscordGuide(){
+      alert('Send the template via DM to @symest on Discord. Make sure you include working links and a good description! The owner may request clarification if needed.');
+    }
+
+    document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ const modal=document.getElementById('altModal'); if(modal.classList.contains('active')) closeModal(); }}); 
+    document.getElementById('altModal').addEventListener('click',(e)=>{ if(e.target===e.currentTarget) closeModal(); });
+
+
+    (function init(){
+      initAlphabet(); displayAlts(); showSection('browse');
+    })();
+  </script>
+</body>
+</html>
